@@ -30,11 +30,13 @@ The Docker image was originally published to [Docker Hub](https://hub.docker.com
 but this repository is now set up to build locally so the image always uses the ComfyUI revision pinned by the
 submodule.
 
-There are two options:
+There are three options:
 
 * Run `docker compose up -d --build`
 * Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the
   first run, use `docker start comfyui-gfx1151`
+* Run `./podman-run.sh`. It builds the same local image with Podman, and if the container already exists it will
+  reuse it via `podman start -ai comfyui-gfx1151`
 
 If you're cloning this repository to build or run it yourself, initialize the submodule first:
 
@@ -48,6 +50,12 @@ After updating the submodule to a newer ComfyUI revision, rebuild the image:
 docker compose build
 ```
 
+With Podman, the equivalent is:
+
+```bash
+podman build -t comfyui-gfx1151:local .
+```
+
 ComfyUI will be available at <http://localhost:8188>.
 
 The starter templates should generate images without any issues.
@@ -56,7 +64,7 @@ Once you've verified that it works, feel free to use this repository as the foun
 
 ### Parameters
 
-Both options have the same pre-configured parameters, which are:
+All three options use the same pre-configured parameters, which are:
 
 * Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty,
   feel free to lower it. This should NOT be > than available RAM. This is NOT allocating VRAM.
@@ -76,6 +84,16 @@ you can do it from within the container (until #4 is resolved):
 
 ```bash
 docker exec -it comfyui-gfx1151 /bin/bash
+
+cd /opt/ComfyUI
+
+pip install -r requirements.txt
+```
+
+With Podman, use:
+
+```bash
+podman exec -it comfyui-gfx1151 /bin/bash
 
 cd /opt/ComfyUI
 
@@ -154,6 +172,12 @@ While the container is running, running
 docker exec -it comfyui-gfx1151 /bin/bash /opt/comfyui-gfx1151-utils/test-pytorch.sh
 ```
 
+or with Podman
+
+```bash
+podman exec -it comfyui-gfx1151 /bin/bash /opt/comfyui-gfx1151-utils/test-pytorch.sh
+```
+
 should produce NO errors. The output should be something like:
 
 ```text
@@ -161,12 +185,18 @@ GPU: AMD Radeon Graphics | FlashAttn: True
 Mean: -0.026233481243252754
 ```
 
-#### Test flash-attention
+### Test flash-attention
 
 While the container is working, running
 
 ```bash
 docker exec -it comfyui-gfx1151 python3 /opt/comfyui-gfx1151-utils/test-pytorch-flashattention.py
+```
+
+or with Podman
+
+```bash
+podman exec -it comfyui-gfx1151 python3 /opt/comfyui-gfx1151-utils/test-pytorch-flashattention.py
 ```
 
 should produce NO errors. The output should be something like:
