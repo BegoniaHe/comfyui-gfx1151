@@ -4,12 +4,13 @@ Dockerized ComfyUI with PyTorch & flash-attention for gfx1151 (AMD Strix Halo, R
 relying on AMD's pre-built and pre-configured environment (no custom wheels).
 
 Versions used:
+
 * ROCm: 7.2
 * PyTorch: 2.9.1
 * Python: 3.12
 * ComfyUI: pinned via git submodule in [ComfyUI](ComfyUI)
 
-**Last updated & tested**: Feb 25, 2026, on 6.18.9 (ArchLinux), AMD RYZEN AI MAX+ 395 (Framework Desktop), 
+**Last updated & tested**: Feb 25, 2026, on 6.18.9 (ArchLinux), AMD RYZEN AI MAX+ 395 (Framework Desktop),
 with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0-1).
 
 > [!CAUTION]
@@ -25,14 +26,14 @@ with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0
 
 ## Get started now
 
-The Docker image was originally published to [Docker Hub](https://hub.docker.com/r/ignatberesnev/comfyui-gfx1151), 
-but this repository is now set up to build locally so the image always uses the ComfyUI revision pinned by the 
+The Docker image was originally published to [Docker Hub](https://hub.docker.com/r/ignatberesnev/comfyui-gfx1151),
+but this repository is now set up to build locally so the image always uses the ComfyUI revision pinned by the
 submodule.
 
 There are two options:
 
 * Run `docker compose up -d --build`
-* Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the 
+* Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the
   first run, use `docker start comfyui-gfx1151`
 
 If you're cloning this repository to build or run it yourself, initialize the submodule first:
@@ -47,7 +48,7 @@ After updating the submodule to a newer ComfyUI revision, rebuild the image:
 docker compose build
 ```
 
-ComfyUI will be available at http://localhost:8188.
+ComfyUI will be available at <http://localhost:8188>.
 
 The starter templates should generate images without any issues.
 
@@ -57,13 +58,13 @@ Once you've verified that it works, feel free to use this repository as the foun
 
 Both options have the same pre-configured parameters, which are:
 
-* Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty, 
+* Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty,
   feel free to lower it. This should NOT be > than available RAM. This is NOT allocating VRAM.
-* Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/Comfy-Org/ComfyUI). This repository pins that 
-  directory as a git submodule, so both local runs and image builds use the same checked-out revision. If the mounted 
+* Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/Comfy-Org/ComfyUI). This repository pins that
+  directory as a git submodule, so both local runs and image builds use the same checked-out revision. If the mounted
   directory is empty when the container starts, it will copy the built-in copy baked into the image
 * Expose port `8188` for ComfyUI
-* Add video + rendering devices and groups. While this just works on Arch, it might require some pre-requisite steps 
+* Add video + rendering devices and groups. While this just works on Arch, it might require some pre-requisite steps
   on Ubuntu, I haven't checked.
 
 There are a couple of scripts that can check that both PyTorch and flash-attention work, you can find them below.
@@ -83,53 +84,53 @@ pip install -r requirements.txt
 
 ## What's inside / how to replicate
 
-This image is based on AMD's [rocm/pytorch](https://hub.docker.com/r/rocm/pytorch) image that has Ubuntu 24.04, 
+This image is based on AMD's [rocm/pytorch](https://hub.docker.com/r/rocm/pytorch) image that has Ubuntu 24.04,
 ROCm 7.2, Python 3.12 and PyTorch 2.9.1, in which everything is configured to work together and it just works.
-You can find out more about this image in 
+You can find out more about this image in
 [AMD's ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installryz/native_linux/install-pytorch.html#use-docker-image-with-pre-installed-pytorch).
 
-There are only two missing pieces which this image adds: [flash-attention](https://github.com/ROCm/flash-attention/) 
+There are only two missing pieces which this image adds: [flash-attention](https://github.com/ROCm/flash-attention/)
 and, well, ComfyUI.
 
-ComfyUI is bundled from the repository's [ComfyUI](ComfyUI) git submodule, so the image build uses the exact revision 
-tracked in this repository instead of cloning from GitHub during `docker build`. You can still bring your own checkout 
+ComfyUI is bundled from the repository's [ComfyUI](ComfyUI) git submodule, so the image build uses the exact revision
+tracked in this repository instead of cloning from GitHub during `docker build`. You can still bring your own checkout
 by replacing the mounted `./ComfyUI` directory if you need to.
 
-**flash-attention**, however, "doesn't work" out of the box if you run AMD's image. I'm saying "doesn't work" because, 
-as far as I understand, it doesn't have the frontend for it (the APIs), but it does have the backend: **Triton**. 
-So flash-attention can be "installed" with a special env variable `FLASH_ATTENTION_TRITON_AMD_ENABLE`, which makes 
-ComfyUI and other tools using flash-attention think that flash-attention is installed and works (even though it's 
-triton under the hood, which is actually doing the job). You can see the lines that install it in 
-[Dockerfile](Dockerfile), and if you try to do it yourself, you'll notice that it executes very fast 
+**flash-attention**, however, "doesn't work" out of the box if you run AMD's image. I'm saying "doesn't work" because,
+as far as I understand, it doesn't have the frontend for it (the APIs), but it does have the backend: **Triton**.
+So flash-attention can be "installed" with a special env variable `FLASH_ATTENTION_TRITON_AMD_ENABLE`, which makes
+ComfyUI and other tools using flash-attention think that flash-attention is installed and works (even though it's
+triton under the hood, which is actually doing the job). You can see the lines that install it in
+[Dockerfile](Dockerfile), and if you try to do it yourself, you'll notice that it executes very fast
 (because flash-attention isn't actually built in full).
 
-It's worth noting that flash-attention is cloned from a specific branch `main_perf` -- I'm not sure why exactly, 
-I haven't checked, but I assume it's because it has (stable?) support for Triton which is not yet in the main branch, 
+It's worth noting that flash-attention is cloned from a specific branch `main_perf` -- I'm not sure why exactly,
+I haven't checked, but I assume it's because it has (stable?) support for Triton which is not yet in the main branch,
 see [this issue](https://github.com/ROCm/flash-attention/issues/27). I basically copy-pasted this part from other
-installations ([vLLM](https://community.frame.work/t/compiling-vllm-from-source-on-strix-halo/77241) and repos by 
+installations ([vLLM](https://community.frame.work/t/compiling-vllm-from-source-on-strix-halo/77241) and repos by
 [kyuz0](https://github.com/kyuz0)), so I hope they know what they're doing :D
 
-In [scripts](scripts) there are two scripts that can check if PyTorch and flash-attention work as expected and utilize 
-the iGPU. I used these when looking for a solution, they proved to be helpful, so I'm adding them to the image in case 
+In [scripts](scripts) there are two scripts that can check if PyTorch and flash-attention work as expected and utilize
+the iGPU. I used these when looking for a solution, they proved to be helpful, so I'm adding them to the image in case
 something breaks or doesn't work as expected, maybe they'll help debug the problem or something.
 
-With that knowledge, you should be able to take [Dockerfile](Dockerfile) and build an image yourself. Just make sure 
+With that knowledge, you should be able to take [Dockerfile](Dockerfile) and build an image yourself. Just make sure
 the submodule is initialized before running `docker build`.
 
-If any of this makes more sense to you than it does to me and you know how to improve something or can add a helpful 
+If any of this makes more sense to you than it does to me and you know how to improve something or can add a helpful
 comment with additional context, please do!
 
 ## What I tried that didn't work
 
-The majority of other solutions seem to rely on custom-built wheels, such as the image by 
+The majority of other solutions seem to rely on custom-built wheels, such as the image by
 [pccr10001/comfyui-gfx1151-fa](https://github.com/pccr10001/comfyui-gfx1151-fa).
 
-I never managed to make these custom wheels work, presumably because of non-locked dependencies (pulling in newer 
-version of rocm/etc with old wheels). However, they made me begin to understand what was happening and how to move 
+I never managed to make these custom wheels work, presumably because of non-locked dependencies (pulling in newer
+version of rocm/etc with old wheels). However, they made me begin to understand what was happening and how to move
 forward, so huge thanks to everyone who left any comments on the topic.
 
-Some other solutions also relied on the image `ghcr.io/rocm/therock_pytorch_dev_ubuntu_24_04_gfx1151`, which is no 
-longer published, so I never got that working either. The image I'm referencing 
+Some other solutions also relied on the image `ghcr.io/rocm/therock_pytorch_dev_ubuntu_24_04_gfx1151`, which is no
+longer published, so I never got that working either. The image I'm referencing
 ([rocm/pytorch](https://hub.docker.com/r/rocm/pytorch)) seems like a replacement for it though?
 
 Initially, I [copied over](https://github.com/pccr10001/comfyui-gfx1151-fa/blob/e6e59be08ff439ab5f9799aa2161f70709fcd975/README.md?plain=1#L33)
@@ -209,4 +210,3 @@ Set HSA_OVERRIDE_GFX_VERSION=11.0.0 to test gfx110x mapping
 ## Acknowledgements
 
 Big thanks to [pccr10001](https://github.com/pccr10001), [lhl](https://github.com/lhl) and [kyuz0](https://github.com/kyuz0) for setting me on the right path!
-
