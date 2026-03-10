@@ -54,7 +54,7 @@ The starter templates should generate images without any issues.
 
 Once you've verified that it works, feel free to use this repository as the foundation for your own setup or workflow.
 
-#### Parameters
+### Parameters
 
 Both options have the same pre-configured parameters, which are:
 
@@ -146,7 +146,7 @@ so I've removed them from this repo's scripts too. If you also experience displa
 
 There are two scripts that you can use to test if everything works correctly
 
-#### Test PyTorch
+### Test PyTorch
 
 While the container is running, running
 
