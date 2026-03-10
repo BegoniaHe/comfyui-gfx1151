@@ -12,7 +12,7 @@ services:
     shm_size: 8G
 
     volumes:
-      - ./ComfyUI:/opt/ComfyUI
+      - ./ComfyUI:/opt/ComfyUI:Z
 
     ports:
       - "8188:8188"

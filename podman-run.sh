@@ -27,7 +27,7 @@ podman run -it \
   --ipc=host \
   -e TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 \
   -p 8188:8188 \
-  -v "$SCRIPT_DIR"/ComfyUI:/opt/ComfyUI \
+  -v "$SCRIPT_DIR"/ComfyUI:/opt/ComfyUI:Z \
   --shm-size 8G \
   --name "$CONTAINER_NAME" \
   "$IMAGE_NAME"

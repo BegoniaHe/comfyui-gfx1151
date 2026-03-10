@@ -38,6 +38,9 @@ There are three options:
 - Run `./podman-run.sh`. It builds the same local image with Podman, and if the container already exists it will
   reuse it via `podman start -ai comfyui-gfx1151`
 
+For Podman on SELinux-enabled systems, the bind mount for [ComfyUI](ComfyUI) uses `:Z` so the container can access
+the repository checkout under your home directory.
+
 ## Development hooks
 
 This repository is configured with `pre-commit`, `ruff`, and `prettier`.
