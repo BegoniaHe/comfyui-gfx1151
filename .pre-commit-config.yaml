@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format-and-stage
+        name: ruff and prettier
+        entry: scripts/pre-commit-format.sh
+        language: system
+        pass_filenames: true
+        require_serial: true
+        files: \.(py|md|json|jsonc|ya?ml)$

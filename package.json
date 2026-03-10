@@ -1,0 +1,11 @@
+{
+  "name": "comfyui-gfx1151",
+  "private": true,
+  "devDependencies": {
+    "prettier": "3.5.3"
+  },
+  "scripts": {
+    "format": "prettier --write README.md docker-compose.yml *.json",
+    "format:check": "prettier --check README.md docker-compose.yml *.json"
+  }
+}
