@@ -5,10 +5,10 @@ relying on AMD's pre-built and pre-configured environment (no custom wheels).
 
 Versions used:
 
-* ROCm: 7.2
-* PyTorch: 2.9.1
-* Python: 3.12
-* ComfyUI: pinned via git submodule in [ComfyUI](ComfyUI)
+- ROCm: 7.2
+- PyTorch: 2.9.1
+- Python: 3.12
+- ComfyUI: pinned via git submodule in [ComfyUI](ComfyUI)
 
 **Last updated & tested**: Feb 25, 2026, on 6.18.9 (ArchLinux), AMD RYZEN AI MAX+ 395 (Framework Desktop),
 with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0-1).
@@ -22,7 +22,7 @@ with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0
 > achieving the same thing. Same goes for the environment variables that are supposedly making ComfyUI
 > faster / resource efficient.
 >
-> I just want to share this solution to save someone else a couple of hours ¯\_(ツ)_/¯
+> I just want to share this solution to save someone else a couple of hours ¯\_(ツ)\_/¯
 
 ## Get started now
 
@@ -32,11 +32,35 @@ submodule.
 
 There are three options:
 
-* Run `docker compose up -d --build`
-* Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the
+- Run `docker compose up -d --build`
+- Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the
   first run, use `docker start comfyui-gfx1151`
-* Run `./podman-run.sh`. It builds the same local image with Podman, and if the container already exists it will
+- Run `./podman-run.sh`. It builds the same local image with Podman, and if the container already exists it will
   reuse it via `podman start -ai comfyui-gfx1151`
+
+## Development hooks
+
+This repository is configured with `pre-commit`, `ruff`, and `prettier`.
+
+Install the tools once:
+
+```bash
+pip install pre-commit ruff
+npm install
+pre-commit install
+```
+
+The installed pre-commit hook will, before each commit:
+
+- run `ruff check --fix` and `ruff format` for staged Python files
+- run `prettier --write` for staged Markdown, YAML, and JSON files
+- automatically `git add` any files changed by those formatters so the formatted result is included in the same commit
+
+To run the hook manually across the repository:
+
+```bash
+pre-commit run --all-files
+```
 
 If you're cloning this repository to build or run it yourself, initialize the submodule first:
 
@@ -66,13 +90,13 @@ Once you've verified that it works, feel free to use this repository as the foun
 
 All three options use the same pre-configured parameters, which are:
 
-* Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty,
+- Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty,
   feel free to lower it. This should NOT be > than available RAM. This is NOT allocating VRAM.
-* Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/Comfy-Org/ComfyUI). This repository pins that
+- Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/Comfy-Org/ComfyUI). This repository pins that
   directory as a git submodule, so both local runs and image builds use the same checked-out revision. If the mounted
   directory is empty when the container starts, it will copy the built-in copy baked into the image
-* Expose port `8188` for ComfyUI
-* Add video + rendering devices and groups. While this just works on Arch, it might require some pre-requisite steps
+- Expose port `8188` for ComfyUI
+- Add video + rendering devices and groups. While this just works on Arch, it might require some pre-requisite steps
   on Ubuntu, I haven't checked.
 
 There are a couple of scripts that can check that both PyTorch and flash-attention work, you can find them below.
