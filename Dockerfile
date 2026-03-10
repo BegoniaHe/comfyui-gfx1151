@@ -17,12 +17,11 @@ RUN cd /opt && \
     git checkout main_perf && \
     python setup.py install
 
-# Cloning and installing ComfyUI in case the user doesn't provide their own
-# - Nothing unusual here afaik
+# Bundle the repo-pinned ComfyUI checkout into the image so builds stay reproducible.
 
-RUN cd /opt && \
-    git clone https://github.com/comfyanonymous/ComfyUI ComfyUI-pre-cloned && \
-    cd ComfyUI-pre-cloned && \
+ADD ComfyUI /opt/ComfyUI-pre-cloned
+
+RUN cd /opt/ComfyUI-pre-cloned && \
     pip3 install -r requirements.txt
 
 # Some utilities to make life/debugging easier

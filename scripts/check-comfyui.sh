@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# If the user mounts /opt/ComfyUI, but their directory doesn't have ComfyUI cloned,
-# we're gonna copy the pre-cloned one into the mounted directory.
+# If the mounted /opt/ComfyUI directory is empty, copy the image-bundled checkout into it.
 
 if [ ! -e /opt/ComfyUI/requirements.txt ]; then
    echo "No ComfyUI detected, copying a built-in (pre-cloned) one..."

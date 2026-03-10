@@ -7,7 +7,7 @@ Versions used:
 * ROCm: 7.2
 * PyTorch: 2.9.1
 * Python: 3.12
-* ComfyUI (built-in): v0.15.0
+* ComfyUI: pinned via git submodule in [ComfyUI](ComfyUI)
 
 **Last updated & tested**: Feb 25, 2026, on 6.18.9 (ArchLinux), AMD RYZEN AI MAX+ 395 (Framework Desktop), 
 with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0-1).
@@ -25,13 +25,27 @@ with [opencl-amd](https://aur.archlinux.org/packages/opencl-amd) packages (7.2.0
 
 ## Get started now
 
-The Docker image is published to [Docker Hub](https://hub.docker.com/r/ignatberesnev/comfyui-gfx1151), 
-so you can, but don't have to build it yourself.
+The Docker image was originally published to [Docker Hub](https://hub.docker.com/r/ignatberesnev/comfyui-gfx1151), 
+but this repository is now set up to build locally so the image always uses the ComfyUI revision pinned by the 
+submodule.
 
 There are two options:
 
-* Copy [docker-compose.yml](docker-compose.yml) and run `docker compose up -d`
-* Copy [docker-run.sh](docker-run.sh) and run `./docker-run.sh`. After the first run, use `docker start comfyui-gfx1151`.
+* Run `docker compose up -d --build`
+* Run `./docker-run.sh`. It builds `comfyui-gfx1151:local` automatically if the image does not exist yet. After the 
+  first run, use `docker start comfyui-gfx1151`
+
+If you're cloning this repository to build or run it yourself, initialize the submodule first:
+
+```bash
+git submodule update --init --recursive
+```
+
+After updating the submodule to a newer ComfyUI revision, rebuild the image:
+
+```bash
+docker compose build
+```
 
 ComfyUI will be available at http://localhost:8188.
 
@@ -45,10 +59,9 @@ Both options have the same pre-configured parameters, which are:
 
 * Allocate 8GB of shared memory (`shm_size`) for internal PyTorch / ComfyUI shenanigans, this should be plenty, 
   feel free to lower it. This should NOT be > than available RAM. This is NOT allocating VRAM.
-* Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/comfyanonymous/ComfyUI). If the directory is empty 
-  when the container starts, it will copy a pre-cloned (baked in) version of ComfyUI. If it's not empty, it will be 
-  used to run ComfyUI located in it. You can update this directory manually to use newer version of ComfyUI without 
-  having to re-download the image
+* Mount `./ComfyUI` for the root of [ComfyUI](https://github.com/Comfy-Org/ComfyUI). This repository pins that 
+  directory as a git submodule, so both local runs and image builds use the same checked-out revision. If the mounted 
+  directory is empty when the container starts, it will copy the built-in copy baked into the image
 * Expose port `8188` for ComfyUI
 * Add video + rendering devices and groups. While this just works on Arch, it might require some pre-requisite steps 
   on Ubuntu, I haven't checked.
@@ -78,7 +91,9 @@ You can find out more about this image in
 There are only two missing pieces which this image adds: [flash-attention](https://github.com/ROCm/flash-attention/) 
 and, well, ComfyUI.
 
-There's nothing specific about the ComfyUI installation, you can actually bring your own, it should work.
+ComfyUI is bundled from the repository's [ComfyUI](ComfyUI) git submodule, so the image build uses the exact revision 
+tracked in this repository instead of cloning from GitHub during `docker build`. You can still bring your own checkout 
+by replacing the mounted `./ComfyUI` directory if you need to.
 
 **flash-attention**, however, "doesn't work" out of the box if you run AMD's image. I'm saying "doesn't work" because, 
 as far as I understand, it doesn't have the frontend for it (the APIs), but it does have the backend: **Triton**. 
@@ -98,7 +113,8 @@ In [scripts](scripts) there are two scripts that can check if PyTorch and flash-
 the iGPU. I used these when looking for a solution, they proved to be helpful, so I'm adding them to the image in case 
 something breaks or doesn't work as expected, maybe they'll help debug the problem or something.
 
-With that knowledge, you should be able to take [Dockerfile](Dockerfile) and build an image yourself.
+With that knowledge, you should be able to take [Dockerfile](Dockerfile) and build an image yourself. Just make sure 
+the submodule is initialized before running `docker build`.
 
 If any of this makes more sense to you than it does to me and you know how to improve something or can add a helpful 
 comment with additional context, please do!

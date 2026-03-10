@@ -3,7 +3,9 @@
 #
 services:
   comfyui:
-    image: ignatberesnev/comfyui-gfx1151:v0.2
+    build:
+      context: .
+    image: comfyui-gfx1151:local
     container_name: comfyui-gfx1151
 
     # Shared memory allocation, should not be > than available RAM, feel free to lower it
